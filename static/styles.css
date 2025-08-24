@@ -171,3 +171,18 @@ nav .navbar-brand .green
     font-size: 1.1rem;   /* slightly bigger text */
   }
 }
+
+
+table tr, table tr th, table tr td {
+  border: none;
+}
+
+.table-responsive {
+  overflow: visible;
+}
+
+table {
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+}
