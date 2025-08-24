@@ -64,6 +64,11 @@ def logs():
 def scanner():
     return render_template("scanner.html")
 
+
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
+
 # end pages
 # ----------------------------------------------------------------------------------------------------------------------------------------------------- #
 
