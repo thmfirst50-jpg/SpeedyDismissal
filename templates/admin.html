@@ -3,5 +3,89 @@
 {% block main %}
 
 <h1>Admin Panel</h1>
+<div class="search-container">
+    <h3>students</h3>
+    <button id="query-toggle" class="btn btn-light">🔍</button>
+</div>
+<div class="table-wrapper">
+<table class="students table table-striped table-hover shadow">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>first name</th>
+            <th>last name</th>
+            <th>grade</th>
+            <th>group id</th>
+            <th>active</th>
+            <th></th>
+        </tr>
+        <tr class="search-row hidden">
+            <th><input type="number"></th>
+            <th><input type="text"></th>
+            <th><input type="text"></th>
+            <th><input type="number"></th>
+            <th><input type="number"></th>
+            <th><input type="number"></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{student.id}}</td>
+            <td>{{student.first_name}}</td>
+            <td>{{student.last_name}}</td>
+            <td>{{student.grade}}</td>
+            <td>{{student.group_id}}</td>
+            <td>{{student.active}}</td>
+            <td>
+                <button id="editEntry"></button>
+                <button id="deleteEntry"></button>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr class="insert-row">
+            <td><button class="insert-button">Insert</button></td>
+            <td><input type="text" name="first_name" placeholder="first_name"></td>
+            <td><input type="text" name="last_name" placeholder="last_name"></td>
+            <td><input type="number" name="grade" placeholder="grade"></td>
+            <td>
+                <select name="group_id">
+                    {% for group in groups %}
+                        <option value="{{group.id}}">{{group.id}} -> {{group.name}}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="active">
+                    <option value="1">1</option>
+                    <option value="0">0</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<script>
+    document.getElementById("query-toggle").addEventListener("click", function () {
+        document.querySelector(".search-row").classList.toggle("hidden");
+    });
+
+    document.querySelector(".insert-button").addEventListener("click", function () {
+        console.log("Inserting Row");
+    });
+
+    document.querySelector("#editEntry").addEventListener("click", function () {
+        console.log("Editing Entry");
+    });
+
+    document.querySelector("#deleteEntry").addEventListener("click", function () {
+        console.log("Deleting Entry");
+    });
+
+
+</script>
 
 {% endblock %}

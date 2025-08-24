@@ -10,25 +10,95 @@ nav {
   background-image: linear-gradient(to bottom, #a1bdda, #eaeff4);
 }
 
-.container-fluid.index-page{
+.search-container {
   /* border: 2px solid black; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px;
+}
+
+.search-container input, .search-row input {
+  border-radius: 40px;
+}
+
+.search-row {
+    transition: all 0.3s ease;
+}
+
+.search-row.hidden {
+    display: none;
+}
+
+.insert-row input, .insert-row button, .insert-row select {
+  border-radius: 10px;
+}
+
+.search-row th {
+  padding: 5px;              /* remove padding so input fills cell */
+  width: 1rem;
+  text-align: left;
+}
+
+.search-row input, .insert-row input,
+.search-row select, .insert-row select {
+    width: 80%;             /* fill the entire table cell */
+    box-sizing: border-box;  /* ensures padding/borders don’t overflow */
+    height: 90%;            /* optional: stretch vertically too */
+}
+
+.container-fluid.index-page{
   margin: 0;
   padding: 0;
 }
 
-table tr, table tr th, table tr td {
-  border: none;
+table.students tr, table.students tr th, table.students tr td {
+  /* border: none; */
+  vertical-align: middle;
 }
 
 .table-responsive {
   overflow: visible;
 }
 
-table {
-  border-collapse: collapse;
+table.students {
+  /* border-collapse: collapse; */
   border-radius: 10px;
   overflow: hidden;
+  table-layout: fixed;
 }
+
+#editEntry, #deleteEntry {
+  width: 20px; /* Set equal width and height for a perfect circle */
+  height: 20px;
+  border-radius: 50%; /* This creates the circular shape */
+  background-color: #e1a40a; /* Example background color */
+  border: none; /* Remove default button border */
+  cursor: pointer;
+  border: 2px solid black;
+  display: inline-block; /* prevent it from stretching */
+  margin: 0 5px;
+}
+
+#deleteEntry {
+  background-color: #ea433b;
+}
+
+table.students td:last-child {
+  text-align: center;
+  vertical-align: middle;
+  width: auto; 
+}
+
+table.students th:last-child,
+table.students td:last-child {
+  width: 100px;
+}
+
+
+/* .table-wrapper {
+  overflow-x: auto;
+} */
 
 .intro-main {
   /* border: 2px solid orange; */

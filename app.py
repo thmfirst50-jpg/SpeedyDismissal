@@ -67,7 +67,9 @@ def scanner():
 
 @app.route("/admin")
 def admin():
-    return render_template("admin.html")
+    students = db.execute("SELECT * FROM students;")
+    groups = db.execute("SELECT * FROM groups;")
+    return render_template("admin.html", students=students, groups=groups)
 
 # end pages
 # ----------------------------------------------------------------------------------------------------------------------------------------------------- #
@@ -184,5 +186,5 @@ def scan():
 
 
 
-# if __name__ == "__main__":
-#     socketio.run(app, host="0.0.0.0", port=7890, debug=False)
+if __name__ == "__main__":
+    socketio.run(app, host="0.0.0.0", port=80, debug=True)
