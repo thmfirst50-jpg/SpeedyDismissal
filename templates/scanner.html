@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="scanner-container flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <h1 class="text-2xl font-bold mb-4">QR Code Scanner</h1>
+    <button class="scanner-start shadow" onclick="startScanner()">Start Scanner</button>
+    <button class="scanner-stop shadow" onclick="stopScanner()">Stop Scanner</button>
+    <div id="reader" class="w-full max-w-sm border-4 border-blue-500 rounded-xl shadow-lg"></div>
+
+    <!-- Dynamic alerts will go here -->
+    <div class="alert-Container fixed top-4 left-1/2 transform -translate-x-1/2 w-full max-w-md z-50"></div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+let html5QrCode;
+let lastScan = null;
+async function onScanSuccess(decodedText) {
+    if (lastScan === decodedText) return;
+    lastScan = decodedText;
+    setTimeout(() => { lastScan = null; }, 3000);
+
+    const response = await fetch("/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: decodedText })
+    });
+
+    const data = await response.json();
+    showAlert(data);
+}
+
+function showAlert(data) {
+    const placeHolder = document.querySelector(".alert-Container");
+
+    // Remove old alerts if you want only one at a time
+    placeHolder.innerHTML = "";
+
+    const alertDiv = document.createElement("div");
+    alertDiv.className = `alert alert-${data.success ? "success" : "danger"} shadow-lg rounded-lg fade show text-center`;
+    alertDiv.role = "alert";
+
+    // Ensure message exists, fallback if not
+    alertDiv.innerHTML = `
+        <strong>${data.success ? "✅ Success:" : "❌ Error:"}</strong>
+        ${data.message || "No details provided."}
+    `;
+
+    placeHolder.append(alertDiv);
+
+    // Add animation
+    alertDiv.style.opacity = "0";
+    alertDiv.style.transform = "translateY(-20px)";
+    setTimeout(() => {
+        alertDiv.style.transition = "all 0.4s ease";
+        alertDiv.style.opacity = "1";
+        alertDiv.style.transform = "translateY(0)";
+    }, 50);
+
+    // Auto remove after 3s
+    setTimeout(() => {
+        alertDiv.style.opacity = "0";
+        alertDiv.style.transform = "translateY(-20px)";
+        setTimeout(() => alertDiv.remove(), 400);
+    }, 3000);
+}
+
+function startScanner() {
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess
+    );
+}
+
+function stopScanner() {
+    html5QrCode.stop();
+}
+</script>
+{% endblock %}

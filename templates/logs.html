@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Pending Table -->
+        <div class="col-12 col-lg-6 mb-4">
+            <h5 class="text-left">Pending</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered align-middle pending-table shadow">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Requested At</th>
+                            <th>Teacher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in pendingStudents %}
+                            <tr class="table-warning" id="student-{{student.id}}">
+                                <td>{{student.id}}</td>
+                                <td>{{student.student}}</td>
+                                <td>{{student.requested_at}}</td>
+                                <td>{{student.teacher_name}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sent Table -->
+        <div class="col-12 col-lg-6 mb-4">
+            <h5 class="text-left">Sent</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered align-middle sent-table shadow">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Sent At</th>
+                            <th>Teacher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in sentStudents %}
+                            <tr class="table-success" id="student-{{student.id}}">
+                                <td>{{student.id}}</td>
+                                <td>{{student.student}}</td>
+                                <td>{{student.sent_at}}</td>
+                                <td>{{student.teacher_name}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    socket.emit("join_group", { room: "logs" })
+
+    socket.on("update_logs", (data) => {
+        console.log("Received Data: ", data);
+
+        if (data.status == "PENDING") {
+            let tableBody = document.querySelector('.pending-table tbody');
+            let tableRow = tableBody.insertRow(0);
+            tableRow.classList.add('table-warning');
+            tableRow.id = `student-${data.id}`;
+            tableRow.insertCell().textContent = data.id;
+            tableRow.insertCell().textContent = data.student;
+            tableRow.insertCell().textContent = data.requested_at;
+            tableRow.insertCell().textContent = data.teacher_name;
+        } else {
+            let tableBody = document.querySelector('.sent-table tbody');
+            let rowToMove = document.querySelector(`#student-${data.id}`);
+            rowToMove.classList.remove('table-warning');
+            rowToMove.classList.add('table-success');
+            tableBody.prepend(rowToMove);
+        }
+    })
+</script>
+{% endblock %}

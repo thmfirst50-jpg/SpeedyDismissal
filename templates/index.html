@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="container-fluid index-page">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="intro-main">
+                    <h3>Hello, {{user[0].first_name}} {{user[0].last_name}}</h3>
+                    <h6>{{user[0].role | lower}}, <span id="group_id">{{user[0].group_id}}</span></h6>                </div>
+                
+                <div class="table-responsive mt-3">
+                    <table class="table table-striped table-bordered align-middle table-hover shadow">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Requested At</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr id="student-{{student.student_id}}"
+                                    class="{{ 'table-success' if student.status == 'ACKED' else 'table-warning' }}">
+                                    <td>{{student.student_id}}</td>
+                                    <td class="student_name">{{student.student}}</td>
+                                    <td class="requested_at">{{student.requested_at}}</td>
+                                    <td class="status">{{student.status}}</td>
+                                    <td class="action">
+                                        {% if student.status == "PENDING" %}
+                                        <button class="btn btn-primary btn-sm" onclick="updateStatus({{student.student_id}})">Send</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function updateStatus(studentId) {
+            // fetch('/updateStatus/' + studentId, {method: 'POST'}).then(() => tdate());
+            socket.emit("update_status", {
+                student_id: studentId,
+                group_id: document.querySelector('#group_id').textContent.trim()
+            });
+            console.log("emitted")
+        }
+
+        socket.on("status_updated", (data) => {
+            console.log("updated");
+            const row = document.querySelector(`#student-${data.student_id}`);
+            console.log("Looking for: ", `#student-${data.student_id}`)
+            if (row) {
+                console.log("row found")
+                row.querySelector(".status").textContent = data.status;
+                row.classList.remove("table-warning")
+                row.classList.add("table-success");
+                row.querySelector(".action").innerHTML = "";
+                sortTable();
+            }
+            let studentName = document.querySelector(`#student-${data.student_id}`).querySelector('.student_name').textContent
+            showAlert({"success": true, "message": `Sending student ${studentName}`});
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            socket.emit("join_group", { room: document.querySelector('#group_id').textContent.trim() });
+            console.log("Joined Group: ", document.querySelector('#group_id').textContent);
+            //requestUpdate();
+        });
+
+        socket.on("student_added", function(data) {
+            console.log("New student Added:", data);
+            addStudentToTable(data);
+        });
+
+        function addStudentToTable(data) {
+            let tableBody = document.querySelector('tbody');
+            let row = tableBody.insertRow(0);
+            row.classList.add("table-warning");
+            row.id = `student-${data.id}`
+            row.insertCell().textContent = data.id;
+            row.insertCell().textContent = data.student;
+            row.insertCell().textContent = data.requested_at;
+            row.insertCell().textContent = data.status;
+            row.insertCell().innerHTML = `<button class="btn btn-primary btn-sm" onclick="updateStatus(${data.id})">Send</button>`;
+            row.cells[1].classList.add('student_name');
+            row.cells[2].classList.add('requested_at');
+            row.cells[3].classList.add('status');
+            row.cells[4].classList.add('action');
+        }
+
+        function sortTable() {
+            const tbody = document.querySelector("table tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            rows.sort((a, b) => {
+                // Step 1: sort by status
+                const statusA = a.querySelector(".status").textContent.trim();
+                const statusB = b.querySelector(".status").textContent.trim();
+
+                if (statusA !== statusB) {
+                    return statusA === "PENDING" ? -1 : 1; // pending rows come first
+                }
+
+                // Step 2: if statuses are the same, sort by timestamp (newest first)
+                const timeA = new Date(a.querySelector(".requested_at").textContent.trim());
+                const timeB = new Date(b.querySelector(".requested_at").textContent.trim());
+
+                return timeB - timeA; // newest first
+            });
+
+            // Re-append rows in sorted order
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function showAlert(data) {
+            const placeHolder = document.querySelector(".alert-Container");
+            const alertDiv = document.createElement("div");
+            alertDiv.className = `alert alert-${data.success == true ? "success" : "danger"} text-center`;
+            alertDiv.innerHTML = data.message;
+
+            placeHolder.append(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+
+    </script>
+
+{% endblock %}

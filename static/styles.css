@@ -1,0 +1,103 @@
+
+body {
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  /* font-weight: bold; */
+  /* border: 2px solid black; */
+  background-color: #eaeff4;
+}
+
+nav {
+  background-image: linear-gradient(to bottom, #a1bdda, #eaeff4);
+}
+
+.container-fluid.index-page{
+  /* border: 2px solid black; */
+  margin: 0;
+  padding: 0;
+}
+
+table tr, table tr th, table tr td {
+  border: none;
+}
+
+.table-responsive {
+  overflow: visible;
+}
+
+table {
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.intro-main {
+  /* border: 2px solid orange; */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.intro-main h3 {
+  margin-right: auto;
+}
+
+/* Size for brand */
+nav .navbar-brand
+{
+    font-size: xx-large;
+}
+
+/* Colors for brand */
+nav .navbar-brand .blue
+{
+    color: #537fbe;
+}
+nav .navbar-brand .red
+{
+    color: #ea433b;
+}
+nav .navbar-brand .yellow
+{
+    color: #f5b82e;
+}
+nav .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+.scanner-start, .scanner-stop {
+  border: none;
+  background-color: rgb(176, 194, 210);
+  border-radius: 100px;
+  padding: 5px 10px;
+  margin: 0 0 10px 0;
+}
+
+.table-custom {
+  font-size: 0.85rem; /* smaller font */
+}
+
+.alert-Container {
+  /* border: 3px solid black; */
+  z-index: 1055;
+  width: 100%;
+  max-width: 400px;
+}
+
+.table-custom td:nth-child(1) { width: 60px; }   /* Pickup ID */
+.table-custom td:nth-child(2) { width: 80px; }   /* Student ID */
+.table-custom td:nth-child(3) { width: 150px; }  /* Student Name */
+.table-custom td:nth-child(4) { width: 120px; }  /* Request At */
+
+@media (max-width: 768px) {
+  .table-custom {
+    font-size: 0.9rem;   /* slightly smaller text */
+  }
+}
+
+/* Make it larger on desktops */
+@media (min-width: 992px) {
+  .table-custom {
+    font-size: 1.1rem;   /* slightly bigger text */
+  }
+}
