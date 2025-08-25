@@ -120,6 +120,7 @@ def broadcastNewStudent(student_ids, pickup_id):
         socketio.emit("update_logs", student[0], room="logs")
     return
 
+
 @socketio.on("update_status")
 def updateStatus(data):
     student_id = data["student_id"]
@@ -136,6 +137,89 @@ def updateStatus(data):
         room="logs")
     except Exception as e:
         return "Error updating status."
+
+    
+
+@app.route("/DELETE", methods=["POST"])
+def DELETE():
+    table = request.json.get("table")
+    values = request.get_json()
+
+    query = f"DELETE FROM {table} WHERE "
+    for key in values:
+        if key != "table":
+            query += f"{key} = '{values[key]}' AND "
+    query += "1 = 1"
+    
+    print(query)
+
+    try:
+        db.execute(query)
+        return jsonify({"success": True, "message": f"Removed Record"}), 200
+    except:
+        pass
+
+    return jsonify({"success": False, "message": "Error Deleting"}), 400
+    
+
+@app.route("/INSERT", methods=["POST"])
+def INSERT():
+    table = request.json.get("table")
+    data = []
+    
+    match table:
+        case "students":
+            data.append(request.json.get("first_name"))
+            data.append(request.json.get("last_name"))
+            data.append(request.json.get("grade"))
+            data.append(request.json.get("group_id"))
+            data.append(request.json.get("active"))
+            if validateInput(data):
+                try:
+                    id = db.execute("INSERT INTO students (first_name, last_name, grade, group_id, active) VALUES (?, ?, ?, ?, ?)", data[0], data[1], data[2], data[3], data[4])
+                    return jsonify({"success": True, "message": "Scan successful", "id": id}), 200
+                except:
+                    pass
+            return jsonify({"success": False, "message": "Error", "id": id}), 400
+
+    return jsonify({"success": False, "message": "Error table", "id": id}), 400
+
+
+@app.route("/QUERY", methods=["POST"])
+def QUERY():
+    data = request.get_json()
+    query = f"SELECT * FROM {data['table']} WHERE "
+
+    params = []
+    for key, value in data.items():
+        if key == "table" or not value:
+            continue
+        query += f"{key} LIKE ? AND "
+        params.append(f"%{value}%")
+    query += "1 = 1"
+    
+    print(query)
+
+    try:
+        if not params: 
+            query = f"SELECT * FROM {data['table']}"
+            response = db.execute(query)
+        else:
+            response = db.execute(query, params)
+        return jsonify({"success": True, 'items': response}), 200
+    except Exception as e:
+        pass
+
+    return jsonify({"success": False, "message": "Error Querying"}), 400
+
+
+def validateInput(data):
+    for item in data:
+        if not item:
+            return False
+    return True
+
+
 
 
 
@@ -182,7 +266,6 @@ def scan():
     except Exception as e:
         db.execute("ROLLBACK")
         return jsonify({"success": False, "message": str(e)}), 500
-
 
 
 

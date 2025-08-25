@@ -68,7 +68,7 @@ table.students {
   table-layout: fixed;
 }
 
-#editEntry, #deleteEntry {
+.deleteEntry {
   width: 20px; /* Set equal width and height for a perfect circle */
   height: 20px;
   border-radius: 50%; /* This creates the circular shape */
@@ -80,7 +80,7 @@ table.students {
   margin: 0 5px;
 }
 
-#deleteEntry {
+.deleteEntry {
   background-color: #ea433b;
 }
 
@@ -92,7 +92,7 @@ table.students td:last-child {
 
 table.students th:last-child,
 table.students td:last-child {
-  width: 100px;
+  width: 50px;
 }
 
 

@@ -8,7 +8,7 @@
     <button id="query-toggle" class="btn btn-light">🔍</button>
 </div>
 <div class="table-wrapper">
-<table class="students table table-striped table-hover shadow">
+<table class="students table table-striped table-hover shadow" id="students">
     <thead>
         <tr>
             <th>id</th>
@@ -20,72 +20,248 @@
             <th></th>
         </tr>
         <tr class="search-row hidden">
-            <th><input type="number"></th>
-            <th><input type="text"></th>
-            <th><input type="text"></th>
-            <th><input type="number"></th>
-            <th><input type="number"></th>
-            <th><input type="number"></th>
+            <th><input id="id" type="number"></th>
+            <th><input id="first_name" type="text"></th>
+            <th><input id="last_name" type="text"></th>
+            <th><input id="grade" type="number"></th>
+            <th><input id="group_id" type="number"></th>
+            <th><input id="active" type="number"></th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         {% for student in students %}
-        <tr>
-            <td>{{student.id}}</td>
-            <td>{{student.first_name}}</td>
-            <td>{{student.last_name}}</td>
-            <td>{{student.grade}}</td>
-            <td>{{student.group_id}}</td>
-            <td>{{student.active}}</td>
+        <tr id="student-{{student.id}}">
+            <td id="id">{{student.id}}</td>
+            <td id="first_name">{{student.first_name}}</td>
+            <td id="last_name">{{student.last_name}}</td>
+            <td id="grade">{{student.grade}}</td>
+            <td id="group_id">{{student.group_id}}</td>
+            <td id="active">{{student.active}}</td>
             <td>
-                <button id="editEntry"></button>
-                <button id="deleteEntry"></button>
+                <button class="deleteEntry" data-id="{{student.id}}"></button>
             </td>
         </tr>
         {% endfor %}
         <tr class="insert-row">
-            <td><button class="insert-button">Insert</button></td>
-            <td><input type="text" name="first_name" placeholder="first_name"></td>
-            <td><input type="text" name="last_name" placeholder="last_name"></td>
-            <td><input type="number" name="grade" placeholder="grade"></td>
+            <form class="insert-form" id="insert-students">
+            <td><button type="submit" >Insert</button></td>
+            <td><input required type="text"  name="first_name" placeholder="first_name"></td>
+            <td><input required type="text"  name="last_name" placeholder="last_name"></td>
+            <td><input required type="number" name="grade" placeholder="grade"></td>
             <td>
-                <select name="group_id">
+                <select required name="group_id">
                     {% for group in groups %}
                         <option value="{{group.id}}">{{group.id}} -> {{group.name}}</option>
                     {% endfor %}
                 </select>
             </td>
             <td>
-                <select name="active">
+                <select required name="active">
                     <option value="1">1</option>
                     <option value="0">0</option>
                 </select>
             </td>
             <td></td>
+            </form>
         </tr>
     </tbody>
 </table>
 </div>
 
 <script>
-    document.getElementById("query-toggle").addEventListener("click", function () {
-        document.querySelector(".search-row").classList.toggle("hidden");
+
+socket.emit("join_group", {room: "admin"})
+
+// -----------------------------------
+// EVENT LISTENERS
+
+// toggle query
+document.getElementById("query-toggle").addEventListener("click", function () {
+    document.querySelector(".search-row").classList.toggle("hidden");
+});
+
+// insert forms
+document.querySelectorAll(".insert-form").forEach(form => {
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const formId = e.currentTarget.id;
+        const table = formId.split("-")[1];
+
+        INSERT(e, table);
     });
+});
 
-    document.querySelector(".insert-button").addEventListener("click", function () {
-        console.log("Inserting Row");
+// delete student
+document.querySelectorAll('table').forEach(table => {
+    table.addEventListener("click", e => {
+        // Make sure the click is on a button we care about
+        if (e.target.classList.contains("deleteEntry")) {
+            const row = e.target.closest("tr");   // 🔑 finds the row that button belongs to
+            const table = e.target.closest("table");
+            const id = row.id.replace("student-", ""); // remove prefix to get numeric id
+            
+            DELETE(e, table.id);
+
+            console.log("Delete row with id:", id);
+            console.log("table: ", table.id);
+            row.remove();  // remove only that row
+        }
     });
+});
 
-    document.querySelector("#editEntry").addEventListener("click", function () {
-        console.log("Editing Entry");
+// query
+document.querySelectorAll(".search-row").forEach(searchRow => {
+    searchRow.addEventListener("input", (e) => {
+        if (e.target.tagName === "INPUT") {
+            console.log("Changed:", e.target.id, "->", e.target.value);
+            const table = e.target.closest("table");
+            QUERY(e, table.id);
+        }
     });
+});
 
-    document.querySelector("#deleteEntry").addEventListener("click", function () {
-        console.log("Deleting Entry");
+
+// -----------------------------------
+// HELPER FUNCTIONS
+
+function getClassByPrefix(el, prefix) {
+    return [...el.classList].find(cls => cls.startsWith(prefix)) || null;
+}
+
+function getRowInputData(row) {
+    const data = {};
+    row.querySelectorAll("th").forEach(th => {
+        const inputField = th.querySelector("input");
+        if (inputField != null && inputField.id) {  
+            console.log(inputField);
+            data[inputField.id] = inputField.value;
+        }
     });
+    return data;
+}
+
+function getRowData(row) {
+    const data = {};
+    row.querySelectorAll("td").forEach(td => {
+        if (td.id) {  // only if td has an id
+            data[td.id] = td.textContent.trim();
+        }
+    });
+    return data;
+}
 
 
+// --------------------------------------------------------
+
+
+// -------------------------------------------------
+// DATABASE MANIPULATION FUNCTIONS
+
+async function DELETE(e, table) {
+    const row = e.target.closest("tr");
+    const data = getRowData(row);
+    console.log(data);
+
+    payload = {...data, table: table};
+    jsonPayload = JSON.stringify(payload);
+
+    const response = await fetch("/DELETE", {method: "POST", headers: { "Content-Type": "application/json" }, body: jsonPayload});
+    const result = await response.json();
+
+    console.log(result);
+}
+
+
+async function INSERT(e, table) {
+
+    let payload;
+
+    // add the payload
+    switch (table) {
+        case 'students':
+            let first_name = e.target.first_name.value;
+            let last_name = e.target.last_name.value;
+            let grade = e.target.grade.value;
+            let group_id = e.target.group_id.value;
+            let active = e.target.active.value;
+            payload = {first_name: first_name, last_name: last_name, grade: grade, group_id: group_id, active: active};
+            console.log("payload");
+            break;
+    }
+
+    console.log(table);
+
+    // add table name
+    jsonPayload = JSON.stringify({ ...payload, table: table });
+
+    // send the data
+    const response = await fetch("/INSERT", {method: "POST", headers: { "Content-Type": "application/json" }, body: jsonPayload});
+    const data = await response.json();
+
+    // inject rows into table
+    if (data.success) {
+        table = document.querySelector(`#${table}`);
+        const rows = table.rows;
+        const tableRow = table.insertRow(rows.length - 1);
+
+        // add logic to see if data.id exists
+        tableRow.id = `student-${data.id}`
+        const acell = tableRow.insertCell();
+        acell.id = "id";
+        acell.textContent = data.id;
+        
+        Object.entries(payload).forEach(([key, value]) => {
+            const cell = tableRow.insertCell();
+            cell.textContent = value;
+            cell.id = key;   // set the <td> id to the key
+        });
+        tableRow.insertCell().innerHTML = `<button class="deleteEntry" data-id="${data.id}"></button>`;
+        //
+    }
+
+}
+
+async function QUERY(e, table) {
+    row = e.target.closest("tr");
+    data = getRowInputData(row);
+
+    console.log(row)
+
+    payload = {...data, table: table};
+    jsonPayload = JSON.stringify(payload);
+
+    const response = await fetch("/QUERY", {method: "POST", headers: { "Content-Type": "application/json" }, body: jsonPayload});
+    const result = await response.json();
+
+    console.log(result);
+    if (result.success) {
+        
+        table = document.querySelector(`#${table}`);
+        const rows = table.tBodies[0].rows;
+
+        while (rows.length > 1) {
+            table.tBodies[0].deleteRow(0); 
+        }
+
+        for (item of result.items) {
+            const rows = table.rows;
+            const tableRow = table.insertRow(rows.length - 1);
+            tableRow.id = `student-${item['id']}`;
+            
+            Object.keys(data).forEach(key => {
+                console.log(key, item[key]);
+                const cell = tableRow.insertCell();
+                cell.id = key;
+                cell.textContent = item[key];
+            });
+            tableRow.insertCell().innerHTML = `<button class="deleteEntry" data-id="${data.id}"></button>`;
+        }
+    }
+}
+
+// -------------------------------------------
 </script>
 
 {% endblock %}
