@@ -54,8 +54,8 @@ def index():
 
 @app.route("/logs")
 def logs():
-    pendingStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, p.requested_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN pickups p ON p.id = ps.pickup_id JOIN users u ON u.group_id = s.group_id WHERE sent_at IS NULL ORDER BY requested_at DESC;")
-    sentStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, ps.sent_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN users u ON u.group_id = s.group_id WHERE sent_at IS NOT NULL ORDER BY sent_at DESC;")
+    pendingStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, p.requested_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN pickups p ON p.id = ps.pickup_id JOIN users u ON u.group_id = s.group_id WHERE sent_at = 'None' ORDER BY requested_at DESC;")
+    sentStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, ps.sent_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN users u ON u.group_id = s.group_id WHERE sent_at != 'None' ORDER BY sent_at DESC;")
     return render_template("logs.html", pendingStudents=pendingStudents, sentStudents=sentStudents)
 
 
@@ -69,7 +69,11 @@ def scanner():
 def admin():
     students = db.execute("SELECT * FROM students;")
     groups = db.execute("SELECT * FROM groups;")
-    return render_template("admin.html", students=students, groups=groups)
+    guardians = db.execute("SELECT * FROM guardians;")
+    users = db.execute("SELECT id, username, 'Censored' AS password_hash, first_name, last_name, role, group_id FROM users;")
+    tokens = db.execute("SELECT * FROM tokens;")
+    guardian_students = db.execute("SELECT * FROM guardian_students")
+    return render_template("admin.html", students=students, groups=groups, guardians=guardians, users=users, tokens=tokens, guardian_students=guardian_students)
 
 # end pages
 # ----------------------------------------------------------------------------------------------------------------------------------------------------- #
@@ -128,14 +132,15 @@ def updateStatus(data):
     if not student_id or not group_id:
         return "Invalid data passed in."
     try:
-        db.execute("UPDATE pickup_students SET status = 'ACKED', sent_at = ? WHERE student_id = ?;", datetime.now().strftime("%Y-%m-%d %H:%M:%S"), student_id)
+        db.execute("UPDATE pickup_students SET status = 'SENT', sent_at = ? WHERE student_id = ?;", datetime.now().strftime("%Y-%m-%d %H:%M:%S"), student_id)
         # send update status to teacher's dashboard
-        socketio.emit("status_updated", {"student_id" : student_id, "status": "ACKED"}, room=group_id)
+        socketio.emit("status_updated", {"student_id" : student_id, "status": "SENT"}, room=group_id)
         # send update status to logs page
         socketio.emit("update_logs",
             db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, ps.sent_at, ps.status, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN users u ON u.group_id = s.group_id WHERE ps.student_id = ?", student_id)[0],
         room="logs")
     except Exception as e:
+        print(str(e))
         return "Error updating status."
 
     
@@ -156,33 +161,51 @@ def DELETE():
     try:
         db.execute(query)
         return jsonify({"success": True, "message": f"Removed Record"}), 200
-    except:
-        pass
+    except Exception as e:
+        print(str(e))
 
     return jsonify({"success": False, "message": "Error Deleting"}), 400
     
 
 @app.route("/INSERT", methods=["POST"])
 def INSERT():
-    table = request.json.get("table")
-    data = []
-    
-    match table:
-        case "students":
-            data.append(request.json.get("first_name"))
-            data.append(request.json.get("last_name"))
-            data.append(request.json.get("grade"))
-            data.append(request.json.get("group_id"))
-            data.append(request.json.get("active"))
-            if validateInput(data):
-                try:
-                    id = db.execute("INSERT INTO students (first_name, last_name, grade, group_id, active) VALUES (?, ?, ?, ?, ?)", data[0], data[1], data[2], data[3], data[4])
-                    return jsonify({"success": True, "message": "Scan successful", "id": id}), 200
-                except:
-                    pass
-            return jsonify({"success": False, "message": "Error", "id": id}), 400
 
-    return jsonify({"success": False, "message": "Error table", "id": id}), 400
+    values = request.get_json()
+    params = ""
+
+    match values['table']:
+        case 'students':
+            params = "(first_name, last_name, grade, group_id, active)"
+        case 'groups':
+            params = "(name)"
+        case 'guardians':
+            params = "(name, phone, email)"
+        case 'users':
+            params = "(username, password_hash, first_name, last_name, role, group_id)"
+            values['password_hash'] = generate_password_hash(values['password_hash'])
+        case 'tokens':
+            params = "(token_value, guardian_id, active, created_at, revoked_at)"
+        case 'guardian_students':
+            params = "(guardian_id, student_id)"
+    
+    query = f"INSERT INTO {values['table']} {params} VALUES ("
+    args = []
+
+    for key, value in values.items():
+        if key != "table":
+            query += f" ?,"
+            args.append(f"{value}")
+    query = query[:len(query) - 1] + ")"
+
+    print(query, "args: ", args)
+    
+    try:
+        id = db.execute(query, *args)
+        return jsonify({"success": True, "message": "Success", "id": id}), 200
+    except Exception as e:
+        print(str(e))
+
+    return jsonify({"success": False, "message": "Error"}), 400
 
 
 @app.route("/QUERY", methods=["POST"])
@@ -206,6 +229,11 @@ def QUERY():
             response = db.execute(query)
         else:
             response = db.execute(query, params)
+        
+        for item in response:
+            if "password_hash" in item:
+                item["password_hash"] = "Censored"
+
         return jsonify({"success": True, 'items': response}), 200
     except Exception as e:
         pass
@@ -250,8 +278,8 @@ def scan():
         db.execute("BEGIN")
 
         pickup_id = db.execute(
-            "INSERT INTO pickups (token_id, requested_by) VALUES (?, NULL)",
-            token[0]["id"]
+            "INSERT INTO pickups (token_id, requested_by) VALUES (?, ?)",
+            token[0]["id"], session["user_id"]
         )
 
         for student_id in student_ids:

@@ -7,7 +7,8 @@
 
                 <div class="intro-main">
                     <h3>Hello, {{user[0].first_name}} {{user[0].last_name}}</h3>
-                    <h6>{{user[0].role | lower}}, <span id="group_id">{{user[0].group_id}}</span></h6>                </div>
+                    <h6>{{user[0].role | lower}}, <span id="group_id">{{user[0].group_id}}</span></h6> 
+                </div>
                 
                 <div class="table-responsive mt-3">
                     <table class="table table-striped table-bordered align-middle table-hover shadow">
@@ -23,7 +24,7 @@
                         <tbody>
                             {% for student in students %}
                                 <tr id="student-{{student.student_id}}"
-                                    class="{{ 'table-success' if student.status == 'ACKED' else 'table-warning' }}">
+                                    class="{{ 'table-success' if student.status == 'SENT' else 'table-warning' }}">
                                     <td>{{student.student_id}}</td>
                                     <td class="student_name">{{student.student}}</td>
                                     <td class="requested_at">{{student.requested_at}}</td>
@@ -50,7 +51,7 @@
                 student_id: studentId,
                 group_id: document.querySelector('#group_id').textContent.trim()
             });
-            console.log("emitted")
+            console.log("emitted", studentId)
         }
 
         socket.on("status_updated", (data) => {

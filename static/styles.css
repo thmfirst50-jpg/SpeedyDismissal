@@ -13,21 +13,31 @@ nav {
 .search-container {
   /* border: 2px solid black; */
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin: 5px;
+}
+
+.search-container h3 {
+  margin-right: auto;
 }
 
 .search-container input, .search-row input {
   border-radius: 40px;
 }
 
+
+
 .search-row {
-    transition: all 0.3s ease;
+    transition: all 1s ease;
 }
 
 .search-row.hidden {
     display: none;
+}
+
+.insert-row.hidden {
+  display: none;
 }
 
 .insert-row input, .insert-row button, .insert-row select {
@@ -47,32 +57,56 @@ nav {
     height: 90%;            /* optional: stretch vertically too */
 }
 
+
 .container-fluid.index-page{
   margin: 0;
   padding: 0;
-}
-
-table.students tr, table.students tr th, table.students tr td {
-  /* border: none; */
-  vertical-align: middle;
 }
 
 .table-responsive {
   overflow: visible;
 }
 
-table.students {
-  /* border-collapse: collapse; */
-  border-radius: 10px;
-  overflow: hidden;
-  table-layout: fixed;
+.table-wrapper table td:last-child {
+  text-align: right;
+}
+
+.table-wrapper table {
+  table-layout: auto;
+}
+
+
+.table-wrapper {
+  overflow-x: auto;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
+}
+
+.table-encapsulator {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.admin-title {
+  text-align: center;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
 }
 
 .deleteEntry {
   width: 20px; /* Set equal width and height for a perfect circle */
   height: 20px;
   border-radius: 50%; /* This creates the circular shape */
-  background-color: #e1a40a; /* Example background color */
+  background-color: #ea433b; /* Example background color */
   border: none; /* Remove default button border */
   cursor: pointer;
   border: 2px solid black;
@@ -80,25 +114,6 @@ table.students {
   margin: 0 5px;
 }
 
-.deleteEntry {
-  background-color: #ea433b;
-}
-
-table.students td:last-child {
-  text-align: center;
-  vertical-align: middle;
-  width: auto; 
-}
-
-table.students th:last-child,
-table.students td:last-child {
-  width: 50px;
-}
-
-
-/* .table-wrapper {
-  overflow-x: auto;
-} */
 
 .intro-main {
   /* border: 2px solid orange; */
@@ -186,3 +201,8 @@ table {
   border-radius: 10px;
   overflow: hidden;
 }
+
+/* .shadow {
+  padding: 0;
+  border-radius: 10px;
+} */

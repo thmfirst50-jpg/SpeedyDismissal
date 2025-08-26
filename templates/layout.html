@@ -14,6 +14,9 @@
         <!-- socketio -->
         <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
+        <!--dayjs-->
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
         <!-- https://favicon.io/emoji-favicons/money-bag/ -->
         <link href="/static/favicon.ico" rel="icon">
 
@@ -63,6 +66,10 @@
                 {% block main %}{% endblock %}
                 </div>
             </div>
+        </main>
+
+        <main style="padding: 10px">
+            {% block main2 %}{% endblock %}
         </main>
 
         <footer class="mb-5">

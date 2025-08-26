@@ -17,8 +17,8 @@ CREATE TABLE students (
 CREATE TABLE guardians (
   id    INTEGER PRIMARY KEY,
   name  TEXT NOT NULL,
-  phone TEXT,
-  email TEXT
+  phone TEXT DEFAULT 'None',
+  email TEXT DEFAULT 'None'
 );
 
 -- link A guardian to a student (or students)
@@ -35,7 +35,7 @@ CREATE TABLE tokens (
   guardian_id  INTEGER NOT NULL REFERENCES guardians(id) ON DELETE CASCADE,
   active       INTEGER NOT NULL DEFAULT 1,
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-  revoked_at   TEXT
+  revoked_at   TEXT DEFAULT 'None'
 );
 
 CREATE TABLE users (
@@ -45,8 +45,8 @@ CREATE TABLE users (
   first_name    TEXT NOT NULL,
   last_name     TEXT NOT NULL,
   role          TEXT NOT NULL CHECK (role IN ('ADMIN','PROCTOR','TEACHER','DOOR')),
-  group_id      INTEGER REFERENCES groups(id)
-);
+  group_id      INTEGER REFERENCES groups(id) ON DELETE SET NULL
+);  
 
 -- 7) Pickup request (one per scan)
 CREATE TABLE pickups (
@@ -55,8 +55,8 @@ CREATE TABLE pickups (
   requested_at  TEXT NOT NULL DEFAULT (datetime('now')),
   requested_by  INTEGER REFERENCES users(id), -- proctor user id; nullable for test
   status        TEXT NOT NULL DEFAULT 'PENDING'
-                 CHECK (status IN ('PENDING','ACKED','READY_AT_EXIT','COMPLETE','CANCELLED')),
-  note          TEXT
+                 CHECK (status IN ('PENDING','SENT')),
+  note          TEXT DEFAULT 'None'
 );
 
 -- 8) Students on that pickup (supports siblings)
@@ -64,7 +64,8 @@ CREATE TABLE pickup_students (
   pickup_id   INTEGER NOT NULL REFERENCES pickups(id) ON DELETE CASCADE,
   student_id  INTEGER NOT NULL REFERENCES students(id),
   status      TEXT NOT NULL DEFAULT 'PENDING'
-               CHECK (status IN ('PENDING','ACKED','READY_AT_EXIT','COMPLETE','NOT_FOUND')),
+               CHECK (status IN ('PENDING','SENT')),
+  sent_at     TEXT DEFAULT 'None',
   PRIMARY KEY (pickup_id, student_id)
 );
 

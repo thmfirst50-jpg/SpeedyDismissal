@@ -1,72 +1,333 @@
 {% extends "layout.html" %}
 
-{% block main %}
+{% block main2 %}
+<h1 class="admin-title">Admin Panel</h1>
 
-<h1>Admin Panel</h1>
-<div class="search-container">
-    <h3>students</h3>
-    <button id="query-toggle" class="btn btn-light">🔍</button>
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>students</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="students table table-striped table-hover" id="students">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>first name</th>
+                <th>last name</th>
+                <th>grade</th>
+                <th>group id</th>
+                <th>active</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th><input id="id" type="number"></th>
+                <th><input id="first_name" type="text"></th>
+                <th><input id="last_name" type="text"></th>
+                <th><input id="grade" type="number"></th>
+                <th><input id="group_id" type="number"></th>
+                <th><input id="active" type="number"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr id="students-{{student.id}}">
+                <td id="id">{{student.id}}</td>
+                <td id="first_name">{{student.first_name}}</td>
+                <td id="last_name">{{student.last_name}}</td>
+                <td id="grade">{{student.grade}}</td>
+                <td id="group_id">{{student.group_id}}</td>
+                <td id="active">{{student.active}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{student.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-students">
+                <td><button type="submit" >Insert</button></td>
+                <td><input required type="text"  name="first_name" ></td>
+                <td><input required type="text"  name="last_name" ></td>
+                <td><input required type="number" name="grade" ></td>
+                <td>
+                    <select required name="group_id">
+                        {% for group in groups %}
+                            <option value="{{group.id}}">{{group.id}} -> {{group.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select required name="active">
+                        <option value="1">1</option>
+                        <option value="0">0</option>
+                    </select>
+                </td>
+                <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
 </div>
-<div class="table-wrapper">
-<table class="students table table-striped table-hover shadow" id="students">
-    <thead>
-        <tr>
-            <th>id</th>
-            <th>first name</th>
-            <th>last name</th>
-            <th>grade</th>
-            <th>group id</th>
-            <th>active</th>
-            <th></th>
-        </tr>
-        <tr class="search-row hidden">
-            <th><input id="id" type="number"></th>
-            <th><input id="first_name" type="text"></th>
-            <th><input id="last_name" type="text"></th>
-            <th><input id="grade" type="number"></th>
-            <th><input id="group_id" type="number"></th>
-            <th><input id="active" type="number"></th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for student in students %}
-        <tr id="student-{{student.id}}">
-            <td id="id">{{student.id}}</td>
-            <td id="first_name">{{student.first_name}}</td>
-            <td id="last_name">{{student.last_name}}</td>
-            <td id="grade">{{student.grade}}</td>
-            <td id="group_id">{{student.group_id}}</td>
-            <td id="active">{{student.active}}</td>
-            <td>
-                <button class="deleteEntry" data-id="{{student.id}}"></button>
-            </td>
-        </tr>
-        {% endfor %}
-        <tr class="insert-row">
-            <form class="insert-form" id="insert-students">
-            <td><button type="submit" >Insert</button></td>
-            <td><input required type="text"  name="first_name" placeholder="first_name"></td>
-            <td><input required type="text"  name="last_name" placeholder="last_name"></td>
-            <td><input required type="number" name="grade" placeholder="grade"></td>
-            <td>
-                <select required name="group_id">
-                    {% for group in groups %}
-                        <option value="{{group.id}}">{{group.id}} -> {{group.name}}</option>
-                    {% endfor %}
-                </select>
-            </td>
-            <td>
-                <select required name="active">
-                    <option value="1">1</option>
-                    <option value="0">0</option>
-                </select>
-            </td>
-            <td></td>
-            </form>
-        </tr>
-    </tbody>
-</table>
+
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>groups</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="groups table table-striped table-hover" id="groups">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th><input id="id" type="number"></th>
+                <th><input id="name" type="text"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            <tr id="groups-{{group.id}}">
+                <td id="id">{{group.id}}</td>
+                <td id="name">{{group.name}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{group.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-groups">
+                    <td><button type="submit" >Insert</button></td>
+                    <td><input required type="text"  name="name" ></td>
+                    <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>guardians</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="guardians table table-striped table-hover" id="guardians">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>phone</th>
+                <th>email</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th><input id="id" type="number"></th>
+                <th><input id="name" type="text"></th>
+                <th><input id="phone" type="tel"></th>
+                <th><input id="email" type="email"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for guardian in guardians %}
+            <tr id="guardians-{{guardian.id}}">
+                <td id="id">{{guardian.id}}</td>
+                <td id="name">{{guardian.name}}</td>
+                <td id="phone">{{guardian.phone}}</td>
+                <td id="email">{{guardian.email}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{guardian.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-guardians">
+                    <td><button type="submit" >Insert</button></td>
+                    <td><input required type="text"  name="name" ></td>
+                    <td><input required type="tel"  name="phone" ></td>
+                    <td><input required type="email" name="email" ></td>
+                    <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>users</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="users table table-striped table-hover" id="users">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>username</th>
+                <th>password_hash</th>
+                <th>first_name</th>
+                <th>last_name</th>
+                <th>role</th>
+                <th>group_id</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th><input id="id" type="number"></th>
+                <th><input id="username" type="text"></th>
+                <th><input id="password_hash" type="text"></th>
+                <th><input id="first_name" type="text"></th>
+                <th><input id="last_name" type="text"></th>
+                <th><input id="role" type="text"></th>
+                <th><input id="group_id" type="text"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr id="users-{{user.id}}">
+                <td id="id">{{user.id}}</td>
+                <td id="username">{{user.username}}</td>
+                <td id="password_hash">{{user.password_hash}}</td>
+                <td id="first_name">{{user.first_name}}</td>
+                <td id="last_name">{{user.last_name}}</td>
+                <td id="role">{{user.role}}</td>
+                <td id="group_id">{{user.group_id}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{user.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-users">
+                    <td><button type="submit" >Insert</button></td>
+                    <td><input required type="text"  name="username" ></td>
+                    <td><input required type="text"  name="password_hash" ></td>
+                    <td><input required type="text" name="first_name" ></td>
+                    <td><input required type="text"  name="last_name" ></td>
+                    <td><input required type="text"  name="role" ></td>
+                    <td><input required type="text" name="group_id" ></td>
+                    <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>tokens</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="tokens table table-striped table-hover" id="tokens">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>token_value</th>
+                <th>guardian_id</th>
+                <th>active</th>
+                <th>created_at</th>
+                <th>revoked_at</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th><input id="id" type="number"></th>
+                <th><input id="token_value" type="text"></th>
+                <th><input id="guardian_id" type="text"></th>
+                <th><input id="active" type="text"></th>
+                <th><input id="created_at" type="text"></th>
+                <th><input id="revoked_at" type="text"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for token in tokens %}
+            <tr id="tokens-{{token.id}}">
+                <td id="id">{{token.id}}</td>
+                <td id="token_value">{{token.token_value}}</td>
+                <td id="guardian_id">{{token.guardian_id}}</td>
+                <td id="active">{{token.active}}</td>
+                <td id="created_at">{{token.created_at}}</td>
+                <td id="revoked_at">{{token.revoked_at}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{token.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-tokens">
+                    <td><button type="submit" >Insert</button></td>
+                    <td><input required type="text"  name="token_value" ></td>
+                    <td><input required type="text"  name="guardian_id" ></td>
+                    <td><input required type="text" name="active" ></td>
+                    <td><input disabled type="text"  name="created_at" value=""></td>
+                    <td><input disabled type="text"  name="revoked_at" value=""></td>
+                    <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="table-encapsulator">
+    <div class="search-container">
+        <h3>guardian_students</h3>
+        <button id="insert-toggle" class="btn">➕</button>
+        <button id="query-toggle" class="btn ">🔍</button>
+    </div>
+    <div class="table-wrapper">
+    <table class="guardian_students table table-striped table-hover" id="guardian_students">
+        <thead>
+            <tr>
+                <th></th>
+                <th>guardian_id</th>
+                <th>student_id</th>
+                <th></th>
+            </tr>
+            <tr class="search-row hidden">
+                <th></th>
+                <th><input id="guardian_id" type="text"></th>
+                <th><input id="student_id" type="number"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for guardian_student in guardian_students %}
+            <tr id="guardian_students-{{guardian_student.id}}">
+                <td></td>
+                <td id="guardian_id">{{guardian_student.guardian_id}}</td>
+                <td id="student_id">{{guardian_student.student_id}}</td>
+                <td>
+                    <button class="deleteEntry" data-id="{{guardian_student.id}}"></button>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="insert-row hidden">
+                <form class="insert-form" id="insert-guardian_students">
+                    <td><button type="submit" >Insert</button></td>
+                    <td><input required type="text"  name="guardian_id" ></td>
+                    <td><input required type="text"  name="student_id" ></td>
+                    <td></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    </div>
 </div>
 
 <script>
@@ -77,9 +338,20 @@ socket.emit("join_group", {room: "admin"})
 // EVENT LISTENERS
 
 // toggle query
-document.getElementById("query-toggle").addEventListener("click", function () {
-    document.querySelector(".search-row").classList.toggle("hidden");
+document.querySelectorAll('#query-toggle').forEach(btn => {
+    btn.addEventListener("click", e => {
+        const row = e.target.parentNode.parentNode.querySelector(".search-row");
+        row.classList.toggle("hidden");
+    });
 });
+document.querySelectorAll('#insert-toggle').forEach(btn => {
+    btn.addEventListener("click", e => {
+        const row = e.target.parentNode.parentNode.querySelector(".insert-row");
+        console.log("toggle");
+        row.classList.toggle("hidden");
+    });
+});
+
 
 // insert forms
 document.querySelectorAll(".insert-form").forEach(form => {
@@ -100,13 +372,8 @@ document.querySelectorAll('table').forEach(table => {
         if (e.target.classList.contains("deleteEntry")) {
             const row = e.target.closest("tr");   // 🔑 finds the row that button belongs to
             const table = e.target.closest("table");
-            const id = row.id.replace("student-", ""); // remove prefix to get numeric id
             
-            DELETE(e, table.id);
-
-            console.log("Delete row with id:", id);
-            console.log("table: ", table.id);
-            row.remove();  // remove only that row
+            DELETE(e, table.id, row);
         }
     });
 });
@@ -165,12 +432,24 @@ async function DELETE(e, table) {
     console.log(data);
 
     payload = {...data, table: table};
+
+    if ('password_hash' in payload) {
+        delete payload.password_hash;
+    }
+
     jsonPayload = JSON.stringify(payload);
 
     const response = await fetch("/DELETE", {method: "POST", headers: { "Content-Type": "application/json" }, body: jsonPayload});
     const result = await response.json();
 
     console.log(result);
+
+    if (result.success) {
+        console.log("table: ", table);
+        row.remove();  // remove only that row
+    }
+
+    showAlert(result);
 }
 
 
@@ -180,7 +459,7 @@ async function INSERT(e, table) {
 
     // add the payload
     switch (table) {
-        case 'students':
+        case 'students': {
             let first_name = e.target.first_name.value;
             let last_name = e.target.last_name.value;
             let grade = e.target.grade.value;
@@ -189,12 +468,54 @@ async function INSERT(e, table) {
             payload = {first_name: first_name, last_name: last_name, grade: grade, group_id: group_id, active: active};
             console.log("payload");
             break;
-    }
+        }
+        case 'groups': {
+            let name = e.target.name.value
+            payload = {name: name}
+            break;
+        }
+        case 'guardians':
+            let name = e.target.name.value;
+            let phone = e.target.phone.value;
+            let email = e.target.email.value;
+            payload = {name: name, phone: phone, email: email};
+            break;
+        case 'users':
+            let username = e.target.username.value;
+            let password_hash = e.target.password_hash.value;
+            let first_name = e.target.first_name.value;
+            let last_name = e.target.last_name.value;
+            let role = e.target.role.value;
+            let group_id = e.target.group_id.value;
+            payload = {username: username, password_hash: password_hash, first_name: first_name, last_name: last_name, role: role, group_id: group_id};
+            break;
+        case 'tokens': {
+            let token_value = e.target.token_value.value;
+            let guardian_id = e.target.guardian_id.value;
+            let active = e.target.active.value;
+            let created_at = dayjs().format("YYYY-MM-DD HH:mm:ss");
+            let revoked_at = 'None';
+            payload = {token_value: token_value, guardian_id: guardian_id, active: active, created_at: created_at, revoked_at: revoked_at};
+            break;
+        }
+        case 'guardian_students':
+            let guardian_id = e.target.guardian_id.value;
+            let student_id = e.target.student_id.value;
+            payload = {guardian_id: guardian_id, student_id:student_id}
+            break;
+    }   
 
     console.log(table);
+    console.log(payload);
+
 
     // add table name
     jsonPayload = JSON.stringify({ ...payload, table: table });
+
+    // censor hash if present
+    if ('password_hash' in payload) {
+        payload['password_hash'] = 'Censored';
+    }
 
     // send the data
     const response = await fetch("/INSERT", {method: "POST", headers: { "Content-Type": "application/json" }, body: jsonPayload});
@@ -202,15 +523,20 @@ async function INSERT(e, table) {
 
     // inject rows into table
     if (data.success) {
-        table = document.querySelector(`#${table}`);
-        const rows = table.rows;
-        const tableRow = table.insertRow(rows.length - 1);
+        tableEl = document.querySelector(`#${table}`);
+        const rows = tableEl.rows;
+        const tableRow = tableEl.insertRow(rows.length - 1);
 
         // add logic to see if data.id exists
-        tableRow.id = `student-${data.id}`
-        const acell = tableRow.insertCell();
-        acell.id = "id";
-        acell.textContent = data.id;
+        // tableRow.id = `${table}-${data.id}`
+
+        if (!table in ["guardian_students"]) {
+            const acell = tableRow.insertCell();
+            acell.id = "id";
+            acell.textContent = data.id;
+        } else {
+            tableRow.insertCell();
+        }
         
         Object.entries(payload).forEach(([key, value]) => {
             const cell = tableRow.insertCell();
@@ -220,7 +546,7 @@ async function INSERT(e, table) {
         tableRow.insertCell().innerHTML = `<button class="deleteEntry" data-id="${data.id}"></button>`;
         //
     }
-
+    showAlert(data);
 }
 
 async function QUERY(e, table) {
@@ -238,28 +564,40 @@ async function QUERY(e, table) {
     console.log(result);
     if (result.success) {
         
-        table = document.querySelector(`#${table}`);
-        const rows = table.tBodies[0].rows;
+        tableEl = document.querySelector(`#${table}`);
+        const rows = tableEl.tBodies[0].rows;
 
         while (rows.length > 1) {
-            table.tBodies[0].deleteRow(0); 
+            tableEl.tBodies[0].deleteRow(0); 
         }
 
         for (item of result.items) {
-            const rows = table.rows;
-            const tableRow = table.insertRow(rows.length - 1);
-            tableRow.id = `student-${item['id']}`;
+            const rows = tableEl.rows;
+            const tableRow = tableEl.insertRow(rows.length - 1);
+            // tableRow.id = `${table}-${item['id']}`;
             
+            table == "guardian_students" ? tableRow.insertCell() : ""
+
             Object.keys(data).forEach(key => {
                 console.log(key, item[key]);
                 const cell = tableRow.insertCell();
                 cell.id = key;
-                cell.textContent = item[key];
+                cell.textContent = item[key] == null ? 'None' : item[key];
             });
             tableRow.insertCell().innerHTML = `<button class="deleteEntry" data-id="${data.id}"></button>`;
         }
     }
 }
+
+function showAlert(data) {
+            const placeHolder = document.querySelector(".alert-Container");
+            const alertDiv = document.createElement("div");
+            alertDiv.className = `alert alert-${data.success == true ? "success" : "danger"} text-center shadow`;
+            alertDiv.innerHTML = data.message;
+
+            placeHolder.append(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
 
 // -------------------------------------------
 </script>
