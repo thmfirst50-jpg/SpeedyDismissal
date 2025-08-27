@@ -170,6 +170,7 @@ nav .navbar-brand .green
   z-index: 1055;
   width: 100%;
   max-width: 400px;
+  pointer-events: none;
 }
 
 .table-custom td:nth-child(1) { width: 60px; }   /* Pickup ID */
