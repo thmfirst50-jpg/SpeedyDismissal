@@ -22,6 +22,8 @@
 
         <link href="/static/styles.css" rel="stylesheet">
 
+        <link rel="manifest" href="/static/manifest.json">
+
         <title>Speedy Dismissal {% block title %}{% endblock %}</title>
 
     </head>
@@ -29,7 +31,13 @@
     <body>
 
         <script>
-            const socket = io();
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/static/service-worker.js")
+                .then(() => console.log("Service Worker registered"))
+                .catch(err => console.error("SW registration failed:", err));
+            }
+
+            const socket = io(); 
             window.socket = socket;
         </script>
 

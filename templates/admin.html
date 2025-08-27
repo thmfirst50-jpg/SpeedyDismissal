@@ -530,7 +530,7 @@ async function INSERT(e, table) {
         // add logic to see if data.id exists
         // tableRow.id = `${table}-${data.id}`
 
-        if (!(table in ["guardian_students"])) {
+        if (!(["guardian_students"].includes(table))) {
             const acell = tableRow.insertCell();
             acell.id = "id";
             acell.textContent = data.id;

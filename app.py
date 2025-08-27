@@ -9,7 +9,7 @@ import re
 import time
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required
+from helpers import apology, login_required, role_required
 
 # configure application
 app = Flask(__name__)
@@ -47,12 +47,31 @@ def joinGroup(data):
 @app.route("/")
 @login_required
 def index():
+    if "role" in session:
+        match session["role"]:
+            case "TEACHER":
+                return redirect("/dashboard")
+            case "SCANNER":
+                return redirect("/scanner")
+            case "DOOR":
+                return redirect("/logs")
+            case "ADMIN":
+                return redirect("/admin")
+
+    return apology("Invalid Role, Please Contant Admin")
+
+@app.route("/dashboard")
+@login_required
+@role_required("TEACHER")
+def dashboard():
     user = db.execute("SELECT first_name, last_name, role, group_id FROM users WHERE id = ?", session["user_id"])
     students = db.execute("SELECT ps.pickup_id, s.id AS student_id, s.first_name || ' ' || s.last_name AS student, p.requested_at, ps.status FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN pickups  p ON p.id = ps.pickup_id WHERE s.group_id = (SELECT group_id FROM users WHERE id = ?) ORDER BY CASE WHEN ps.status = 'PENDING' THEN 0 ELSE 1 END, p.requested_at DESC;", session["user_id"])
     return render_template("index.html", user=user, students=students)
 
 
 @app.route("/logs")
+@login_required
+@role_required("ADMIN", "DOOR")
 def logs():
     pendingStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, p.requested_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN pickups p ON p.id = ps.pickup_id JOIN users u ON u.group_id = s.group_id WHERE sent_at = 'None' ORDER BY requested_at DESC;")
     sentStudents = db.execute("SELECT s.id, s.first_name || ' ' || s.last_name AS student, ps.sent_at, u.first_name || ' ' || u.last_name AS teacher_name FROM pickup_students ps JOIN students s ON s.id = ps.student_id JOIN users u ON u.group_id = s.group_id WHERE sent_at != 'None' ORDER BY sent_at DESC;")
@@ -61,11 +80,15 @@ def logs():
 
 
 @app.route("/scanner")
+@login_required
+@role_required("ADMIN", "SCANNER")
 def scanner():
     return render_template("scanner.html")
 
 
 @app.route("/admin")
+@login_required
+@role_required("ADMIN")
 def admin():
     students = db.execute("SELECT * FROM students;")
     groups = db.execute("SELECT * FROM groups;")
@@ -77,9 +100,7 @@ def admin():
 
 # end pages
 # ----------------------------------------------------------------------------------------------------------------------------------------------------- #
-
-
-
+# Begin Log in/out
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -90,11 +111,13 @@ def login():
         if not username or not password:
             return apology("Please enter a valid username/password")
 
-        user = db.execute("SELECT id, password_hash FROM users WHERE username = ?", username)
+        user = db.execute("SELECT id, password_hash, role FROM users WHERE username = ?", username)
         if not check_password_hash(user[0]["password_hash"], password):
             return apology("Incorrect Password")
 
         session["user_id"] = user[0]["id"]
+        session["role"] = user[0]["role"]
+        print("role", session["role"])
 
         return redirect("/")
 
@@ -107,14 +130,8 @@ def logout():
     return redirect("/login")
 
 
-
-
-@app.route("/test_emit/<string:room>/<string:message>")
-def test_emit(room, message):
-    socketio.emit("update_logs", {"student": message}, room=room)
-    return "Emitted"
-
-
+# End
+# ----------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 
 def broadcastNewStudent(student_ids, pickup_id):
@@ -146,6 +163,7 @@ def updateStatus(data):
     
 
 @app.route("/DELETE", methods=["POST"])
+@login_required
 def DELETE():
     table = request.json.get("table")
     values = request.get_json()
@@ -168,6 +186,7 @@ def DELETE():
     
 
 @app.route("/INSERT", methods=["POST"])
+@login_required
 def INSERT():
 
     values = request.get_json()
@@ -209,6 +228,7 @@ def INSERT():
 
 
 @app.route("/QUERY", methods=["POST"])
+@login_required
 def QUERY():
     data = request.get_json()
     query = f"SELECT * FROM {data['table']} WHERE "
@@ -253,6 +273,7 @@ def validateInput(data):
 
 
 @app.route("/scan", methods=["GET", "POST"])
+@login_required
 def scan():
     if request.method == "GET":
         token_value = request.args.get("token")
