@@ -44,7 +44,7 @@ CREATE TABLE users (
   password_hash TEXT NOT NULL,
   first_name    TEXT NOT NULL,
   last_name     TEXT NOT NULL,
-  role          TEXT NOT NULL CHECK (role IN ('ADMIN','PROCTOR','TEACHER','DOOR')),
+  role          TEXT NOT NULL CHECK (role IN ('ADMIN','SCANNER','TEACHER','DOOR')),
   group_id      INTEGER REFERENCES groups(id) ON DELETE SET NULL
 );  
 

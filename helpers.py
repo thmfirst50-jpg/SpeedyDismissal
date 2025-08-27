@@ -41,5 +41,23 @@ def login_required(f):
         if session.get("user_id") is None:
             return redirect("/login")
         return f(*args, **kwargs)
-
     return decorated_function
+
+def role_required(*roles):
+    """
+    Decorator to require a specific role (or roles) in session.
+    Should be stacked **on top of** login_required.
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Assuming login_required already ensured session exists
+            if "role" not in session:
+                return redirect("/login")  # Optional, extra safety
+            if session["role"] not in roles:
+                print("inside role: ", session["role"])
+                print("roles: ", roles)
+                return apology(f"invalid permissions")  # Forbidden
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
