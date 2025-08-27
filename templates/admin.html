@@ -78,7 +78,7 @@
         <button id="insert-toggle" class="btn">➕</button>
         <button id="query-toggle" class="btn ">🔍</button>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper" id="table-wrapper-no-overflow">
     <table class="groups table table-striped table-hover" id="groups">
         <thead>
             <tr>
@@ -120,7 +120,7 @@
         <button id="insert-toggle" class="btn">➕</button>
         <button id="query-toggle" class="btn ">🔍</button>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper" id="table-wrapper-no-overflow">
     <table class="guardians table table-striped table-hover" id="guardians">
         <thead>
             <tr>
@@ -290,7 +290,7 @@
         <button id="insert-toggle" class="btn">➕</button>
         <button id="query-toggle" class="btn ">🔍</button>
     </div>
-    <div class="table-wrapper">
+    <div class="table-wrapper" id="table-wrapper-no-overflow">
     <table class="guardian_students table table-striped table-hover" id="guardian_students">
         <thead>
             <tr>
@@ -530,7 +530,7 @@ async function INSERT(e, table) {
         // add logic to see if data.id exists
         // tableRow.id = `${table}-${data.id}`
 
-        if (!table in ["guardian_students"]) {
+        if (!(table in ["guardian_students"])) {
             const acell = tableRow.insertCell();
             acell.id = "id";
             acell.textContent = data.id;
