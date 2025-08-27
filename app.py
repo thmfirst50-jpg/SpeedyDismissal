@@ -298,8 +298,8 @@ def scan():
 
 
 if __name__ == "__main__":
-    # socketio.run(app, host="0.0.0.0", port=443, ssl_context=("server.crt", "server.key"))
+    # socketio.run(app, host="0.0.0.0", port=5000, ssl_context=("server.crt", "server.key"))
     import eventlet
     import eventlet.wsgi
 
-    socketio.run(app, host="0.0.0.0", port=443, certfile="server.crt", keyfile="server.key")
+    socketio.run(app, host="127.0.0.1", port=5000)
